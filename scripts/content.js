@@ -174,7 +174,7 @@ document.getElementById("subreddit-input").addEventListener("input", async (e) =
 
 // Message listener to toggle the subreddit bar
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  console.log("Message received:", msg);
+  //console.log("Message received:", msg);
   if (msg.action === "toggleSubredditBar") {
     const bar = document.getElementById("subreddit-bar");
     if (bar) {
