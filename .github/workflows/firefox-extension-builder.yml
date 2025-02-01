@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-node@v3  # Updated to the latest version
         with:
           node-version: '16'  # Consider updating to a more recent LTS version if possible
-          cache: 'npm'  # Cache npm dependencies to speed up future builds
 
       - name: Install dependencies
         run: npm install -g web-ext
