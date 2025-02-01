@@ -30,9 +30,6 @@ jobs:
       - name: Build the extension
         run: web-ext build --artifacts-dir build
 
-      - name: Set tag
-        run: echo "::set-env name=TAG::$(git describe --tags --abbrev=0)"
-
       - name: Release the extension
         uses: softprops/action-gh-release@v1
         with:
