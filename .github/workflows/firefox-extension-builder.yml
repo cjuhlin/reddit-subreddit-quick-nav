@@ -35,7 +35,7 @@ jobs:
         with:
           files: build/*.zip
           token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: ${{ github.ref }}
+          name: ${{ github.ref }}
           body: ${{ github.ref }}
           draft: false
           prerelease: false
