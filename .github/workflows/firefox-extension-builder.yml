@@ -1,12 +1,11 @@
 name: Build and Release Firefox Extension
 
 on:
-    push:
-        branches:
-            - main
-        tags:
-            - v*
-  
+  push:
+    branches:
+      - main
+    tags:
+      - v*
 
 jobs:
   build:
@@ -14,12 +13,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to the latest version
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3  # Updated to the latest version
         with:
-          node-version: '16'
+          node-version: '16'  # Consider updating to a more recent LTS version if possible
+          cache: 'npm'  # Cache npm dependencies to speed up future builds
 
       - name: Install dependencies
         run: npm install -g web-ext
@@ -30,13 +30,17 @@ jobs:
       - name: Build the extension
         run: web-ext build --artifacts-dir build
 
+      - name: Archive build artifacts
+        run: |
+          cd build
+          zip -r extension.zip ./*
+
       - name: Release the extension
         uses: softprops/action-gh-release@v1
         with:
-          files: build/*.zip
+          files: build/extension.zip
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ github.ref }}
-          body: ${{ github.ref }}
+          name: ${{ github.ref_name }}  # Use ref_name instead of ref for a cleaner name
+          body: "Release version ${{ github.ref_name }}"  # More descriptive body
           draft: false
-          prerelease: false
-          
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}  # Automatically set prerelease based on tag
