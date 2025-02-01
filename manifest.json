@@ -1,0 +1,29 @@
+{
+    "manifest_version": 2,
+    "name": "Reddit Subreddit Quick Nav",
+    "author": "Christopher J",
+    "homepage_url": "https://github.com/cjuhlin/reddit-subreddit-quick-nav",
+    "version": "1.0",
+    "description": "Open a bar to quickly navigate to a subreddit using a keyboard shortcut.",
+    "permissions": ["activeTab", "storage", "tabs","webNavigation"],
+    "background": {
+        "scripts": [
+          "scripts/background.js"
+        ]
+      },
+"content_scripts": [
+  {
+    "matches": ["*://*.reddit.com/*"],
+    "js": ["scripts/content.js"]
+  }
+],
+    "commands": {
+      "open-subreddit-bar": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+F",
+          "mac": "Command+Shift+F"
+        },
+        "description": "Open the subreddit navigation bar"
+      }
+    }
+  }
