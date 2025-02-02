@@ -3,7 +3,7 @@
     "name": "Reddit Subreddit Quick Nav",
     "author": "Christopher J",
     "homepage_url": "https://github.com/cjuhlin/reddit-subreddit-quick-nav",
-    "version": "1.0",
+    "version": "1.1",
     "description": "Open a bar to quickly navigate to a subreddit using a keyboard shortcut.",
     "permissions": ["activeTab", "storage", "tabs","webNavigation"],
     "background": {
