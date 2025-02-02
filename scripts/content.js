@@ -1,3 +1,4 @@
+//console.log("Content script loaded!");
 
 // Helper function to get a cookie by name
 function getCookie(name) {
@@ -7,19 +8,58 @@ function getCookie(name) {
   return null;
 }
 
-// Determine the theme from the cookie ("1" for light mode, "2" for dark mode)
-const theme = getCookie("theme");
-const isDarkMode = theme === "2";
+// Function to update the bar's styling based on the current theme
+function updateBarTheme() {
+  // Determine the theme from the cookie ("1" for light mode, "2" for dark mode)
+  const theme = getCookie("theme");
+  const isDarkMode = theme === "2";
 
-// Define color variables based on the theme
-const backgroundColor = isDarkMode ? "#1a1a1b" : "#ffffff";
-const textColor = isDarkMode ? "#d7dadc" : "#1a1a1b";
-const borderColor = isDarkMode ? "#343536" : "#ccc";
-const buttonBackground = isDarkMode ? "#272729" : "#f6f7f8";
-const suggestionHoverColor = isDarkMode ? "#2a2a2b" : "#f6f7f8";
+  // Define color variables based on the theme
+  const backgroundColor = isDarkMode ? "#1a1a1b" : "#ffffff";
+  const textColor = isDarkMode ? "#d7dadc" : "#1a1a1b";
+  const borderColor = isDarkMode ? "#343536" : "#ccc";
+  const suggestionHoverColor = isDarkMode ? "#2a2a2b" : "#f6f7f8";
 
-// Variable to track the currently highlighted suggestion index
-let currentSuggestionIndex = -1;
+  // Update the subreddit bar styling
+  const bar = document.getElementById("subreddit-bar");
+  if (bar) {
+    bar.style.backgroundColor = backgroundColor;
+    bar.style.color = textColor;
+    bar.style.borderBottom = `1px solid ${borderColor}`;
+
+    // Update the input field styling
+    const inputField = document.getElementById("subreddit-input");
+    if (inputField) {
+      inputField.style.backgroundColor = backgroundColor;
+      inputField.style.color = textColor;
+      inputField.style.border = `1px solid ${borderColor}`;
+    }
+
+    // Update the suggestions container styling
+    const suggestionsDiv = document.getElementById("suggestions");
+    if (suggestionsDiv) {
+      suggestionsDiv.style.backgroundColor = backgroundColor;
+      suggestionsDiv.style.border = `1px solid ${borderColor}`;
+    }
+
+    // Update each suggestion item's styling
+    document.querySelectorAll(".suggestion-item").forEach((item) => {
+      item.style.backgroundColor = backgroundColor;
+      item.style.color = textColor;
+      item.style.borderBottom = `1px solid ${borderColor}`;
+    });
+
+    // Update the hover style for suggestions
+    const styleTag = document.getElementById("suggestions-hover-style");
+    if (styleTag) {
+      styleTag.textContent = `
+        .suggestion-item:hover {
+          background-color: ${suggestionHoverColor};
+        }
+      `;
+    }
+  }
+}
 
 // Create the subreddit bar if it doesn't exist
 if (!document.getElementById("subreddit-bar")) {
@@ -32,34 +72,32 @@ if (!document.getElementById("subreddit-bar")) {
   bar.style.padding = "8px 16px";
   bar.style.zIndex = "1000";
   bar.style.display = "none"; // Initially hidden
-  bar.style.backgroundColor = backgroundColor;
-  bar.style.color = textColor;
-  bar.style.borderBottom = `1px solid ${borderColor}`;
-  bar.style.boxShadow = "none";
   bar.style.fontFamily = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
-  // Use a flex layout for centering the input and button
+  // Initial theme update before inserting the bar
+  updateBarTheme();
+
+  // Use a flex layout for centering the input field
   bar.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
       <input type="text" id="subreddit-input" placeholder="Enter subreddit name..." 
-        style="flex: 1; max-width: 400px; padding: 6px 8px; border: 1px solid ${borderColor}; border-radius: 4px; margin-right: 8px; font-size: 14px; background-color: ${backgroundColor}; color: ${textColor};" />
-      <button id="subreddit-go" 
-        style="padding: 6px 12px; border: 1px solid ${borderColor}; border-radius: 4px; background-color: ${buttonBackground}; color: ${textColor}; font-size: 14px; cursor: pointer;">
-        Go
-      </button>
+        style="flex: 1; max-width: 400px; padding: 6px 8px; border-radius: 4px; font-size: 14px;" />
     </div>
     <div id="suggestions" 
-      style="max-width: 400px; margin: 8px auto 0; background-color: ${backgroundColor}; border: 1px solid ${borderColor}; border-radius: 4px; overflow: hidden;">
+      style="max-width: 400px; margin: 8px auto 0; border-radius: 4px; overflow: hidden;">
     </div>
   `;
   document.body.appendChild(bar);
 }
 
+// Variable to track the currently highlighted suggestion index
+let currentSuggestionIndex = -1;
+
 // Function to clear the suggestion highlight styling
 function clearSuggestionHighlight() {
   const items = document.querySelectorAll(".suggestion-item");
   items.forEach((item) => {
-    item.style.backgroundColor = backgroundColor;
+    item.style.backgroundColor = "";
   });
 }
 
@@ -67,7 +105,8 @@ function clearSuggestionHighlight() {
 function highlightSuggestion(items, index) {
   clearSuggestionHighlight();
   if (index >= 0 && index < items.length) {
-    items[index].style.backgroundColor = suggestionHoverColor;
+    items[index].style.backgroundColor = "#d7dadc"; // Temporary highlight; updated by theme later
+    updateBarTheme();
   }
 }
 
@@ -78,11 +117,6 @@ function navigateToSubreddit() {
     window.location.href = `https://www.reddit.com/r/${subreddit}`;
   }
 }
-
-// Event listener for the "Go" button
-document.getElementById("subreddit-go").addEventListener("click", () => {
-  navigateToSubreddit();
-});
 
 // Input field keydown event to handle arrow navigation and Enter key selection
 document.getElementById("subreddit-input").addEventListener("keydown", (e) => {
@@ -134,7 +168,7 @@ document.getElementById("subreddit-input").addEventListener("input", async (e) =
       // Render the suggestion list
       suggestionsDiv.innerHTML = suggestions
         .map((sub) => `<div class="suggestion-item" 
-            style="padding: 6px 8px; cursor: pointer; border-bottom: 1px solid ${borderColor}; background-color: ${backgroundColor}; color: ${textColor};">
+            style="padding: 6px 8px; cursor: pointer; border-bottom: 1px solid;">
               ${sub}
             </div>`)
         .join("");
@@ -149,10 +183,8 @@ document.getElementById("subreddit-input").addEventListener("input", async (e) =
         });
       });
 
-      // Auto-complete: if the first suggestion starts with the typed query, and
-      // if the caret is at the end of the input, auto-fill the text field.
-      if (suggestions.length > 0 &&
-          inputField.selectionStart === originalQuery.length) {
+      // Auto-complete: if the first suggestion starts with the typed query, auto-fill the text field.
+      if (suggestions.length > 0 && inputField.selectionStart === originalQuery.length) {
         const firstSuggestion = suggestions[0];
         if (
           firstSuggestion.toLowerCase().startsWith(originalQuery.toLowerCase()) &&
@@ -163,6 +195,7 @@ document.getElementById("subreddit-input").addEventListener("input", async (e) =
           inputField.setSelectionRange(originalQuery.length, firstSuggestion.length);
         }
       }
+      updateBarTheme();
     } catch (error) {
       console.error("Error fetching suggestions:", error);
       suggestionsDiv.innerHTML = "";
@@ -172,13 +205,13 @@ document.getElementById("subreddit-input").addEventListener("input", async (e) =
   }
 });
 
-// Message listener to toggle the subreddit bar
+// Message listener to toggle the subreddit bar and update its theme
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   //console.log("Message received:", msg);
   if (msg.action === "toggleSubredditBar") {
+    updateBarTheme();
     const bar = document.getElementById("subreddit-bar");
     if (bar) {
-      // Toggle the display of the bar
       bar.style.display = (bar.style.display === "none" || !bar.style.display) ? "block" : "none";
       if (bar.style.display === "block") {
         document.getElementById("subreddit-input").focus();
@@ -189,11 +222,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-// Additional CSS for hover effects on suggestions
+// Additional CSS for hover effects on suggestions using a dedicated style element
 const style = document.createElement("style");
+style.id = "suggestions-hover-style";
 style.textContent = `
   .suggestion-item:hover {
-    background-color: ${suggestionHoverColor};
+    background-color: #f6f7f8;
   }
 `;
 document.head.appendChild(style);
