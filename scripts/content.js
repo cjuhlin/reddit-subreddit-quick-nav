@@ -34,30 +34,30 @@ function updateBarTheme() {
       inputField.style.color = textColor;
       inputField.style.border = `1px solid ${borderColor}`;
     }
+  }
 
-    // Update the suggestions container styling
-    const suggestionsDiv = document.getElementById("suggestions");
-    if (suggestionsDiv) {
-      suggestionsDiv.style.backgroundColor = backgroundColor;
-      suggestionsDiv.style.border = `1px solid ${borderColor}`;
-    }
+  // Update the suggestions overlay styling
+  const suggestionsDiv = document.getElementById("suggestions");
+  if (suggestionsDiv) {
+    suggestionsDiv.style.backgroundColor = backgroundColor;
+    suggestionsDiv.style.border = `1px solid ${borderColor}`;
+  }
 
-    // Update each suggestion item's styling
-    document.querySelectorAll(".suggestion-item").forEach((item) => {
-      item.style.backgroundColor = backgroundColor;
-      item.style.color = textColor;
-      item.style.borderBottom = `1px solid ${borderColor}`;
-    });
+  // Update each suggestion item's styling
+  document.querySelectorAll(".suggestion-item").forEach((item) => {
+    item.style.backgroundColor = backgroundColor;
+    item.style.color = textColor;
+    item.style.borderBottom = `1px solid ${borderColor}`;
+  });
 
-    // Update the hover style for suggestions
-    const styleTag = document.getElementById("suggestions-hover-style");
-    if (styleTag) {
-      styleTag.textContent = `
-        .suggestion-item:hover {
-          background-color: ${suggestionHoverColor};
-        }
-      `;
-    }
+  // Update the hover style for suggestions
+  const styleTag = document.getElementById("suggestions-hover-style");
+  if (styleTag) {
+    styleTag.textContent = `
+      .suggestion-item:hover {
+        background-color: ${suggestionHoverColor};
+      }
+    `;
   }
 }
 
@@ -77,14 +77,15 @@ if (!document.getElementById("subreddit-bar")) {
   // Initial theme update before inserting the bar
   updateBarTheme();
 
-  // Use a flex layout for centering the input field
+  // Use a wrapper for the input field with relative positioning
   bar.innerHTML = `
-    <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
+    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%;">
       <input type="text" id="subreddit-input" placeholder="Enter subreddit name..." 
         style="flex: 1; max-width: 400px; padding: 6px 8px; border-radius: 4px; font-size: 14px;" />
-    </div>
-    <div id="suggestions" 
-      style="max-width: 400px; margin: 8px auto 0; border-radius: 4px; overflow: hidden;">
+      <!-- Suggestions overlay container -->
+      <div id="suggestions" 
+        style="position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1001; max-width: 400px; margin: 0 auto; border-radius: 4px; overflow: hidden;">
+      </div>
     </div>
   `;
   document.body.appendChild(bar);
@@ -165,7 +166,7 @@ document.getElementById("subreddit-input").addEventListener("input", async (e) =
       const data = await response.json();
       const suggestions = data.subreddits.map((sub) => sub.name);
 
-      // Render the suggestion list
+      // Render the suggestion list as an overlay
       suggestionsDiv.innerHTML = suggestions
         .map((sub) => `<div class="suggestion-item" 
             style="padding: 6px 8px; cursor: pointer; border-bottom: 1px solid;">
